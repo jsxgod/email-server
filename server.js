@@ -6,10 +6,10 @@ const cors = require("cors");
 const emailRoutes = require("./routes/emailRoutes");
 
 app.use(express.json());
-app.use(cors({ origin: "https://ksdev.netlify.app/", credentials: true }));
+app.use(cors({ origin: "*", credentials: true }));
 app.options("*", cors());
 app.use("/api/email", emailRoutes);
 
-app.listen(process.env.PORT, () =>
-  console.log(`server running on port ${process.env.PORT}`)
-);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log(`server running on port ${PORT}`));
