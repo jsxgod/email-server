@@ -1,10 +1,25 @@
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 const nl2br = require("nl2br");
+const { ImgurClient } = require("imgur");
 
 const sendEmail = async (req, res) => {
   const data = req.body;
   try {
+    if (data?.attachment) {
+      const base64Data = data.attachment.split(",")[1];
+      if (base64Data !== undefined) {
+        const client = new ImgurClient({
+          clientId: process.env.IMGUR_CLIENT_ID,
+          clientSecret: process.env.IMGUR_CLIENT_SECRET,
+        });
+        const response = await client.upload({
+          image: base64Data,
+          type: "base64",
+        });
+        console.log(response);
+      }
+    }
     let transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -15,14 +30,10 @@ const sendEmail = async (req, res) => {
     let info = await transporter.sendMail({
       from: `${data?.name} ${data?.surname} <${data?.email}>`,
       to: "kacpersmyczyk@gmail.com",
-      subject: `${data?.subject} <${data?.email}>`,
+      subject: `🥳 ~ Portfolio contact ~ ${data?.subject} <${data?.email}>`,
       html: `<h1>Name: ${data?.name}</h1><h1>Surname: ${
         data?.surname
-      }</h1><h2>Email: ${data?.email}</h2><p>${nl2br(
-        data?.message
-      )}</p><br/>Embedded image: <img src=${
-        data?.attachment
-      } width="100" height="150"/>`,
+      }</h1><h2>Email: ${data?.email}</h2><p>${nl2br(data?.message)}`,
     });
     console.dir(req.body);
     console.log("Message sent: $s", info.messageId);
