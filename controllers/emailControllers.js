@@ -5,6 +5,7 @@ const { ImgurClient } = require("imgur");
 
 const sendEmail = async (req, res) => {
   const data = req.body;
+  let imageURL = undefined;
   try {
     if (data?.attachment) {
       const base64Data = data.attachment.split(",")[1];
@@ -17,7 +18,9 @@ const sendEmail = async (req, res) => {
           image: base64Data,
           type: "base64",
         });
-        console.log(response);
+        if (response.success) {
+          imageURL = response.data.link;
+        }
       }
     }
     let transporter = nodemailer.createTransport({
@@ -33,7 +36,11 @@ const sendEmail = async (req, res) => {
       subject: `🥳 ~ Portfolio contact ~ ${data?.subject} <${data?.email}>`,
       html: `<h1>Name: ${data?.name}</h1><h1>Surname: ${
         data?.surname
-      }</h1><h2>Email: ${data?.email}</h2><p>${nl2br(data?.message)}`,
+      }</h1><h2>Email: ${data?.email}</h2><p>${nl2br(
+        data?.message
+      )}</p><br/><p>Image attachment: ${
+        imageURL ? `<a href="${imageURL}">Image Link</a>` : "No image"
+      }</p>`,
     });
     console.dir(req.body);
     console.log("Message sent: $s", info.messageId);
